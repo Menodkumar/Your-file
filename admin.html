@@ -1,28 +1,69 @@
-
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
   <title>Admin Panel</title>
-  
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyApp5AxyiHEdnbyG9YBMk3b-xO5xlKsusk",
-    authDomain: "yourfile-12.firebaseapp.com",
-    projectId: "yourfile-12",
-    storageBucket: "yourfile-12.appspot.com",
-    messagingSenderId: "151248565374",
-    appId: "1:151248565374:web:31064724d2fb7c9a92542f"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-</script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial; margin: 30px; }
+    h2 { margin-bottom: 10px; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 10px 0; }
+    button { margin-left: 10px; }
+  </style>
 </head>
 <body>
-  <h1>Welcome, Admin</h1>
-  <p>Admin file management UI goes here.</p>
-</body>
+  <h2>Admin Panel - All Uploaded Files</h2>
+  <ul id="allFilesList"></ul>  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+    import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyApp5AxyiHEdnbyG9YBMk3b-xO5xlKsusk",
+      authDomain: "yourfile-12.firebaseapp.com",
+      projectId: "yourfile-12",
+      storageBucket: "yourfile-12.appspot.com",
+      messagingSenderId: "151248565374",
+      appId: "1:151248565374:web:31064724d2fb7c9a92542f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+
+    const ADMIN_EMAIL = "oinamthanilkhuman@gmail.com";
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user || user.email !== ADMIN_EMAIL) {
+        alert("Access denied. Only admin can view this page.");
+        window.location.href = "index.html";
+        return;
+      }
+      listAllUsersFiles();
+    });
+
+    async function listAllUsersFiles() {
+      const rootRef = ref(storage);
+      const result = await listAll(rootRef);
+      const allFilesList = document.getElementById("allFilesList");
+      allFilesList.innerHTML = "";
+
+      for (const folderRef of result.prefixes) {
+        const folderName = folderRef.name;
+        const subResult = await listAll(folderRef);
+        const subList = document.createElement("ul");
+        const folderTitle = document.createElement("h3");
+        folderTitle.textContent = folderName;
+        allFilesList.appendChild(folderTitle);
+
+        for (const fileRef of subResult.items) {
+          const url = await getDownloadURL(fileRef);
+          const li = document.createElement("li");
+          li.innerHTML = `<a href="${url}" target="_blank">${fileRef.name}</a>`;
+          subList.appendChild(li);
+        }
+        allFilesList.appendChild(subList);
+      }
+    }
+  </script></body>
 </html>
