@@ -1,0 +1,60 @@
+<!DOCTYPE html><html>
+<head>
+  <title>Register - YourFile</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial; padding: 30px; max-width: 400px; margin: auto; }
+    input, button { width: 100%; padding: 10px; margin: 10px 0; }
+    button { background-color: #4CAF50; color: white; border: none; }
+    button:hover { background-color: #45a049; }
+  </style>
+</head>
+<body>
+  <h2>Create an Account</h2>
+  <input type="text" id="fullName" placeholder="Full Name" required>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <button onclick="registerUser()">Register</button>
+  <p>Already have an account? <a href="index.html">Log in</a></p>  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyApp5AxyiHEdnbyG9YBMk3b-xO5xlKsusk",
+      authDomain: "yourfile-12.firebaseapp.com",
+      projectId: "yourfile-12",
+      storageBucket: "yourfile-12.appspot.com",
+      messagingSenderId: "151248565374",
+      appId: "1:151248565374:web:31064724d2fb7c9a92542f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.registerUser = () => {
+      const name = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!name || !email || !password) {
+        alert("Please fill out all fields.");
+        return;
+      }
+
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          return updateProfile(userCredential.user, {
+            displayName: name
+          });
+        })
+        .then(() => {
+          alert("Registration successful. Please log in.");
+          window.location.href = "index.html";
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    };
+  </script></body>
+</html>
